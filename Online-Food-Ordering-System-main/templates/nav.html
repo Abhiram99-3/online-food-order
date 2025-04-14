@@ -1,0 +1,1382 @@
+﻿<!doctype html>
+<html lang="en">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap CSS -->
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <title>Hello, world!</title>
+</head>
+
+<body>
+
+  <nav class="navbar navbar-inverse">
+    <div class="container-fluid">
+
+      <div class="navbar-header">
+        <a class="navbar-brand " href="{{ url_for('home') }}">FakePanda</a>
+      </div>
+
+    </div>
+  </nav>
+  <div style="float:right">
+    <form align="right" name="form1" method="post" action="{{url_for('logout')}}">
+      <label class="logoutLblPos">
+        <input name="Logout" type="submit" style="margin-left: 5px;" class=" btn btn-info " id="Logout" value="Logout">
+      </label>
+    </form>
+  </div>
+  <div class="container">
+
+    <ul class="nav nav-tabs">
+      <li class="active"><a href="#Home">Home</a></li>
+      <li><a href="#Shop">Shops</a></li>
+      <li><a href="#MyOrder" onclick="searchMyOrders()">My Orders</a></li>
+      <li><a href="#ShopOrder" onclick="searchShopOrders()">Shop Orders</a></li>
+      <li><a href="#TsRecord" onclick="searchTransactionRecord()">Transaction Records</a></li>
+    </ul>
+
+    <div class="tab-content">
+      <div id="Home" class="tab-pane fade in active">
+        <h3>Profile</h3>
+        <div class="row">
+          <div class="col-xs-12">
+            Accouont:{{user_info['U_account']}}, Name:{{user_info['U_name']}}, {{'manager' if user_info['U_type'] else
+            'user'}}, PhoneNumber:
+            {{user_info['U_phone']}}, location:
+            {{user_info['U_latitude']}}, {{user_info['U_longitude']}}
+
+            <button type="button " style="margin-left: 5px;" class=" btn btn-info " data-toggle="modal"
+              data-target="#location">Edit location</button>
+            <!--  -->
+            <div class="modal fade" id="location" data-backdrop="static" tabindex="-1" role="dialog"
+              aria-labelledby="staticBackdropLabel" aria-hidden="true">
+              <div class="modal-dialog  modal-sm">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">edit location</h4>
+                  </div>
+                  <div class="modal-body">
+                    <form id="edit_location" action="edit_location" method="post">
+                      <label class="control-label " for="latitude">latitude</label>
+                      <input type="text" class="form-control" name="latitude" id="latitude"
+                        placeholder="enter latitude">
+
+                      <br>
+                      <label class="control-label " for="longitude">longitude</label>
+                      <input type="text" class="form-control" name="longitude" id="longitude"
+                        placeholder="enter longitude">
+                      <div class="modal-footer">
+                        <button type="submit" class="btn btn-default">Edit</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
+            <!--  -->
+            walletbalance: {{user_info['U_balance']}}
+            <!-- Modal -->
+            <button type="button " style="margin-left: 5px;" class=" btn btn-info " data-toggle="modal"
+              data-target="#top_up">Top Up</button>
+            <div class="modal fade" id="top_up" data-backdrop="static" tabindex="-1" role="dialog"
+              aria-labelledby="staticBackdropLabel" aria-hidden="true">
+              <div class="modal-dialog  modal-sm">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Top Up</h4>
+                  </div>
+                  <div class="modal-body">
+                    <form id="top_up" action="top_up" method="post">
+                      <input type="number" class="form-control" name="value" placeholder="enter add value">
+                      <div class="modal-footer">
+                        <button type="submit" class="btn btn-default">Add</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- 
+                
+             -->
+        <h3>Search</h3>
+        <div class=" row  col-xs-8">
+          <form class="form-horizontal" action="/action_page.php" method="post" id="search_form">
+            <div class="form-group">
+              <label class="control-label col-sm-1" for="Shop">Shop</label>
+              <div class="col-sm-5">
+                <input type="text" class="form-control" name="shop" placeholder="Enter Shop name">
+              </div>
+              <label class="control-label col-sm-1" for="distance">distance</label>
+              <div class="col-sm-5">
+
+
+                <select class="form-control" name="sel1">
+                  <option value="%">Select</option>
+                  <option>near</option>
+                  <option>medium </option>
+                  <option>far</option>
+
+                </select>
+              </div>
+
+            </div>
+
+            <div class="form-group">
+
+              <label class="control-label col-sm-1" for="Price">Price</label>
+              <div class="col-sm-2">
+
+                <input type="number" class="form-control" name="price_low" placeholder="0">
+
+              </div>
+              <label class="control-label col-sm-1" for="~">~</label>
+              <div class="col-sm-2">
+
+                <input type="number" class="form-control" name="price_high" placeholder="∞">
+
+              </div>
+              <label class="control-label col-sm-1" for="Meal">Meal</label>
+              <div class="col-sm-5">
+                <input type="text" class="form-control" name="meal" placeholder="Enter Meal">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="control-label col-sm-1" for="category"> category</label>
+              <div class="col-sm-5">
+                <input type="text" class="form-control" name="category" placeholder="Enter shop category">
+              </div>
+
+              <label class="control-label col-sm-1" for="order">ordering</label>
+              <div class="col-sm-5">
+                <select class="form-control" name="ordering">
+                  <option>shop</option>
+                  <option>distance </option>
+                  <option>category</option>
+                </select>
+              </div>
+
+            </div>
+            <div class="form-group">
+              <label class="control-label col-sm-1" for="desc order">desc order</label>
+              <div class="col-sm-5">
+                <input type="checkbox" class="form-check-input" id="desc">
+              </div>
+              <button type="submit" style="margin-left: 18px;" class="btn btn-primary">Search</button>
+            </div>
+          </form>
+          <script type="text/javascript">
+            var lat = 0.0, lon = 0.0;
+            // get user location
+            $(document).ready(function () {
+              $.ajax({
+                url: 'http://' + window.location.host + '/get_session',
+                type: 'GET',
+                dataType: 'json',
+                success: function (result) {
+                  lat = result.user_info['U_latitude']
+                  lon = result.user_info['U_longitude']
+                },
+                error: function (xhr, status, error) {
+                  var err = eval("(" + xhr.responseText + ")");
+                  alert(err.Message + '\n' + 'http://' + window.location.host + '/get_session');
+                }
+              });
+            })
+            var menu_data = {};
+            function updateMealTable(shop) {
+              // console.log(menu_data[shop.name])	
+              var n, table = '', menu = menu_data[shop.name];
+              $.each(menu, function (i, m) {
+                table += '<tr><th scope="row">' + (i + 1) + '</th>';
+                table += '<td><img src="data:image/' + m.P_imagetype + ';base64,' + atob(m.P_image) + '" style="width: 72px; height: 72px;"></td>';
+                // <img src="data:image/xxx;base64,xxxxxxxxxxxxx...">	
+                table += '<td>' + m.P_name + '</td>'
+                table += '<td>' + m.P_price + '</td>'
+                table += '<td>' + m.P_quantity + '</td>'
+                // quantity calculation	
+                // !!! format-string is using `` instead of ''
+                table += `<input type="hidden" name="PIDs" value="${m.PID}">`
+                table += `<td><input type="number" name="Quantities" min="0" value="0"></td></tr>`
+              })
+              $("#menu-update").html(table);
+            }
+            var shop_1 = '<td><button type="button" data-toggle="modal" data-target="#menu" name="',
+              shop_2 = '_menu" class="btn btn-info " onclick="updateMealTable(this)">Open menu</button></td></tr>',
+              // note that name is used for menu search (data is stored in menu_data)	
+              shop_arr = [], index = 1;
+            function updateShopTable(page_name) {
+              var n, table = '';
+              if (shop_arr.length > 0) {
+                if (page_name == 'pre') {
+                  if (index > 0) {
+                    index -= 1;
+                  }
+                } else if (page_name == 'nxt') {
+                  if (index < shop_arr.length - 1) {
+                    index += 1;
+                  }
+                } else {
+                  index = parseInt(page_name) - 1;
+                }
+                $.each(shop_arr[index], function (i, td) {
+                  table += '<tr><th scope="row">' + (i + 1) + '</th>';
+                  table += '<td>' + td.shop_name + '</td>';
+                  table += '<td>' + td.foodtype + '</td>';
+                  table += '<td>' + td.distance + '</td>';
+                  menu_data[td.shop_name + '_menu'] = td.menu
+                  table += shop_1 + td.shop_name + shop_2;
+                });
+              }
+              $("#shop-update").html(table);
+            }
+            var page_1 = '<li class="page-item"><a class="page-link" href="#" onclick="updateShopTable(this.name)" '
+            function updatePage(max_pages) {
+              page = '<li class="page-item"><a class="page-link" href="#" onclick="updateShopTable(this.name)" name="pre">pre</a></li>'
+              for (var i = 1; i <= max_pages; i++) {
+                page += page_1 + `name="${i}">${i}</a></li>`
+              }
+              page += '<li class="page-item"><a class="page-link" href="#" onclick="updateShopTable(this.name)" name="nxt">nxt</a></li>'
+              $("#page-update").html(page);
+            }
+            var shop_data = {}, shops_per_page = 5;
+            function updateArr(shops) {
+              shop_arr = [];
+              curr_page = 1;
+              for (var i = 0; i < Math.ceil(shop_data.length / shops_per_page); i++) {
+                shop_arr.push([]);
+              }
+              $.each(shops, function (i, shop) {
+                shop_arr[~~(i / shops_per_page)].push(shop);  // ~~(11 / 3) = 3
+              });
+              return
+            }
+            var hash_table = { "shop": 'S_name', "distance": 'manhattan', "category": 'S_foodtype' }
+            $('form.form-horizontal').on('submit', function () {
+              var location = { 'U_lat': lat, 'U_lon': lon }
+              var f = $(this), method = f.attr('method'), input_value = {};
+              f.find('[name]').each(function (index, value) {
+                var inputs = $(this),
+                  name = inputs.attr('name'),
+                  value = inputs.val();
+                input_value[name] = value;
+              });
+              if (input_value['price_low'] == '') {
+                input_value['price_low'] = 0
+              }
+              input_value['ordering'] = hash_table[input_value['ordering']]
+              input_value['desc'] = document.getElementById("desc").checked
+              $.ajax({
+                url: 'http://' + window.location.host + "/search-shops",
+                method: method,
+                data: Object.assign({}, input_value, location),
+                async: false,
+                success: function (data) {
+                  for (key in menu_data) delete menu_data[key];
+                  shop_data = data.tableRow
+                  updateArr(shop_data);
+                  updatePage(Math.ceil(shop_data.length / shops_per_page));
+                  updateShopTable("1");
+                },
+                error: function (jqxhr, textStatus, errorThrown) {
+                  alert("error: " + textStatus)
+                }
+              })
+              return false;
+            });
+          </script>
+        </div>
+        <div class="row">
+          <div class="  col-xs-8">
+            <table class="table" style="margin-top: 15px;">
+              <thead>
+                <tr>
+                  <th scope="col">#</th>
+
+                  <th scope="col">shop name</th>
+                  <th scope="col">shop category</th>
+                  <th scope="col">Distance</th>
+
+                </tr>
+              </thead>
+              <tbody id="shop-update">
+
+              </tbody>
+            </table>
+
+            <!-- Modal Order Preview-->
+            <div class="modal fade" id="menu" data-backdrop="static" tabindex="-1" role="dialog"
+              aria-labelledby="staticBackdropLabel" aria-hidden="true">
+              <div class="modal-dialog">
+
+                <!-- Modal content-->
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">menu</h4>
+                  </div>
+                  <form id="Order_Preview">
+                    <div class="modal-body">
+                      <!-- Order made -->
+                      <div class="row">
+                        <div class="  col-xs-12">
+                          <table class="table" style=" margin-top: 15px;">
+                            <thead>
+                              <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Picture</th>
+
+                                <th scope="col">meal name</th>
+
+                                <th scope="col">price</th>
+                                <th scope="col">Quantity</th>
+
+                                <th scope="col">Order quantity</th>
+                              </tr>
+                            </thead>
+                            <tbody id="menu-update">
+                              <!-- To be added -->
+                            </tbody>
+                          </table>
+                        </div>
+
+                      </div>
+
+                      <!-- Order button  -->
+                    </div>
+                    <div class="modal-footer">
+                      <label>Diliver type:<select class="form-control" name="Dilivery" style="width: 150px;">
+                          <option value="1">Delivery</option>
+                          <option value="0">Pick-up</option>
+                        </select></label>
+                      <button type="submit" name="Order_Preview" class="btn btn-default">Preview Order</button>
+                    </div>
+                  </form>
+                </div>
+                <script type="text/javascript">
+                  // variable send to order_made()
+                  var Home_Order_Info = {
+                    "PIDs": [],
+                    "Quantities": [],
+                    "S_owner": null,
+                    "Type": null,
+                  }
+                  $('document').ready(function () {
+                    $('#Order_Preview').on('submit', function (event) {
+                      event.preventDefault();
+                      $.ajax({
+                        url: 'http://' + window.location.host + "/order_preview",
+                        method: "POST",
+                        data: $(this).serialize(),
+                        async: false,
+                        success: function (Order_info) {
+                          body = ""
+                          var Products = Order_info.Products
+                          for (let i = 0; i < Products.length; i++) {
+                            p = Products[i]
+                            body += "<tr>"
+                            body += `<th scope="row">${i + 1}</th>`
+                            body += `<td><img src="data:image/${p.P_imagetype};base64, ${atob(p.P_image)}" style="width: 72px; height: 72px;"></td>
+                                     <td>${p.P_name}</td>
+                                     <td>${p.P_price}</td>
+                                     <td>${p.Order_quantity}</td>`
+                            body += "</tr>"
+
+                            Home_Order_Info.PIDs.push(p.PID)
+                            Home_Order_Info.Quantities.push(p.Order_quantity)
+                          }
+                          $('#Order_Made #Order_Made_Menu').html(body);
+                          $('#Order_Made #Subtotal').html(`Subtotal $${Order_info.Subtotal}`)
+                          $('#Order_Made #Delivery_fee').html(`<small><em>Delivery fee $${Order_info.Delivery_fee}</small></em>`)
+                          $('#Order_Made #Total_price').html(`Total Price $${Order_info.Delivery_fee + Order_info.Subtotal}`)
+
+                          // global variable
+                          Home_Order_Info.S_owner = Order_info.S_owner
+                          Home_Order_Info.Type = Order_info.Type
+
+
+                          $('#menu').modal('hide')
+                          $('#Order_Made').modal('show')
+                        },
+                        error: function (jqxhr, textStatus, errorThrown) {
+                          alert(jqxhr.responseText)
+                          location.reload(true);
+                        }
+                      })
+                    });
+                  });
+                </script>
+              </div>
+            </div>
+            <!-- Modal Order Made -->
+            <div class="modal fade" id="Order_Made" data-backdrop="static" tabindex="-1" role="dialog"
+              aria-labelledby="staticBackdropLabel" aria-hidden="true">
+              <div class="modal-dialog">
+
+                <!-- Modal content-->
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Order Preview</h4>
+                  </div>
+                  <form id="Order_Made_form">
+                    <div class="modal-body">
+                      <!-- Order made -->
+                      <div class="row">
+                        <div class="  col-xs-12">
+                          <table class="table" style=" margin-top: 15px;">
+                            <thead>
+                              <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Picture</th>
+
+                                <th scope="col">Meal name</th>
+
+                                <th scope="col">Price</th>
+                                <th scope="col">Order quantity</th>
+                              </tr>
+                            </thead>
+                            <tbody id="Order_Made_Menu">
+                              <!-- To be added -->
+                            </tbody>
+                          </table>
+                        </div>
+
+                      </div>
+
+                      <!-- Order button  -->
+                    </div>
+                    <!-- <input type="hidden" name="Order_info"></input> -->
+                    <div class="modal-footer">
+                      <p class="text-right" id="Subtotal"></p>
+                      <p class="text-right" id="Delivery_fee"></p>
+                      <p class="text-right" id="Total_price"></p>
+                      <button type="submit" name="Order_Made" class="btn btn-default">Order</button>
+                    </div>
+                  </form>
+                </div>
+                <script type="text/javascript">
+                  $('document').ready(function () {
+                    $('#Order_Made').on('submit', function (event) {
+                      console.log(JSON.stringify(Home_Order_Info))
+                      event.preventDefault();
+                      $.ajax({
+                        url: 'http://' + window.location.host + "/order_made",
+                        method: "POST",
+                        contentType: 'application/json',
+                        data: JSON.stringify(Home_Order_Info),
+                        async: false,
+                        success: function (data) {
+                          console.log(data)
+                          alert(data.message);
+                          location.reload(true);
+                        },
+                        error: function (jqxhr, textStatus, errorThrown) {
+                          alert(jqxhr.responseText)
+                          location.reload(true);
+                        }
+                      })
+                    });
+                  });
+                </script>
+              </div>
+            </div>
+            <ul class="pagination" id="page-update">
+              <li class="page-item"><a class="page-link" href="#">pre</a></li>
+              <li class="page-item"><a class="page-link" href="#">1</a></li>
+              <li class="page-item"><a class="page-link" href="#">nxt</a></li>
+            </ul>
+          </div>
+
+        </div>
+      </div>
+      <!-- ADDING REGISTER FOR STORE HERE -->
+      <div id="Shop" class="tab-pane fade">
+        <form action="shop_register" method="post" id="register" class="fh5co-form animate-box"
+          data-animate-effect="fadeIn">
+          <h3> Start a business </h3>
+          {% with messages = get_flashed_messages() %}
+          {% if messages %}
+          <script>
+            var messages = "{{ '\n'.join(messages) | safe }}";
+            alert(messages);
+          </script>
+          <ul class=flashes>
+            {% for message in messages %}
+            <div class="alert alert-warning">
+              <button type="button" class="close" data-dismiss="alert">x</button>
+              {{ message }}
+            </div>
+            {% endfor %}
+          </ul>
+          {% endif %}
+          {% endwith %}
+          {% block body %}{% endblock %}
+          <div class="form-group ">
+            <div class="row">
+              <div class="col-xs-2">
+                <label for="shop_name">shop name</label>
+                {% if not user_info['U_type'] %}
+                <!-- if the user is not a shop owner-->
+                <input class="form-control" id="shop_name" name="shop_name" placeholder="macdonald" type="text">
+                <div id="msg"></div>
+                {% else %}
+                <!-- if the user is a shop owner-->
+                <input class="form-control" id="shop_name" name="shop_name" placeholder="{{shop_info['S_name']}}"
+                  type="text" readonly>
+                {% endif %}
+              </div>
+              <div class="col-xs-2">
+                <label for="shop_category">shop category</label>
+                {% if not user_info['U_type'] %}
+                <!-- if the user is not a shop owner-->
+                <input class="form-control" id="shop_category" name="shop_category" placeholder="fast food" type="text">
+                {% else %}
+                <!-- if the user is a shop owner-->
+                <input class="form-control" id="shop_category" name="shop_category"
+                  placeholder="{{shop_info['S_foodtype']}}" type="text" readonly>
+                {% endif %}
+              </div>
+              <div class="col-xs-2">
+                <label for="shop_latitude">latitude</label>
+                {% if not user_info['U_type'] %}
+                <!-- if the user is not a shop owner-->
+                <input class="form-control" id="shop_latitude" name="shop_latitude" placeholder="24.78472733371133"
+                  type="text">
+                {% else %}
+                <!-- if the user is a shop owner-->
+                <input class="form-control" id="shop_latitude" name="shop_latitude"
+                  placeholder="{{shop_info['S_latitude']}}" type="text" readonly>
+                {% endif %}
+              </div>
+              <div class="col-xs-2">
+                <label for="shop_longitude">longitude</label>
+                {% if not user_info['U_type'] %}
+                <!-- if the user is not a shop owner-->
+                <input class="form-control" id="shop_longitude" name="shop_longitude" placeholder="121.00028167648875"
+                  type="text">
+                {% else %}
+                <!-- if the user is a shop owner-->
+                <input class="form-control" id="shop_longitude" name="shop_longitude"
+                  placeholder="{{shop_info['S_longitude']}}" type="text" readonly>
+                {% endif %}
+              </div>
+              <script type="text/javascript">
+                $('document').ready(function () {
+                  $('#shop_name').on('input', function () {
+                    $.ajax({
+                      url: 'http://' + window.location.host + "/register-shop_name-check",
+                      method: "POST",
+                      data: $('#shop_name').serialize(),
+                      async: false,
+                      success: function (data) {
+                        $('#msg').html(data);
+                      },
+                      error: function (jqxhr, textStatus, errorThrown) {
+                        alert("error: " + textStatus)
+                      }
+                    })
+                  });
+                });
+              </script>
+            </div>
+          </div>
+
+          <div class=" row" style=" margin-top: 25px;">
+            <div class=" col-xs-3">
+              {% if not user_info['U_type'] %}
+              <!-- if the user is not a shop owner-->
+              <button type="submit" class="btn btn-primary">register</button>
+              {% else %}
+              <!-- if the user is a shop owner-->
+              <button type="button" class="btn btn-primary" disabled>register</button>
+              {% endif %}
+            </div>
+          </div>
+        </form>
+        <!-- SHOP(ADD)  -->
+        <hr>
+        <form action="shop_add" method="post" id="shop_add" class="fh5co-form animate-box" data-animate-effect="fadeIn"
+          enctype="multipart/form-data">
+          <h3>ADD</h3>
+
+          <div class="form-group ">
+            <div class="row">
+
+              <div class="col-xs-6">
+                <label for="meal_name">meal name</label>
+                <input class="form-control" id="meal_name" name="meal_name" type="text">
+              </div>
+            </div>
+            <div class="row" style=" margin-top: 15px;">
+
+              <div class="col-xs-3">
+                <label for="meal_price">price</label>
+                <input class="form-control" id="meal_price" name="meal_price" type="text">
+              </div>
+              <div class="col-xs-3">
+                <label for="meal_quantity">quantity</label>
+                <input class="form-control" id="meal_quantity" name="meal_quantity" type="text">
+              </div>
+            </div>
+
+            <div class="row" style=" margin-top: 25px;">
+
+              <div class=" col-xs-3">
+                <label for="meal_pic">上傳圖片</label>
+                <input id="meal_pic" type="file" name="meal_pic" multiple class="file-loading">
+
+              </div>
+              <div class=" col-xs-3">
+                <button style=" margin-top: 15px;" type="submit" class="btn btn-primary">Add</button>
+              </div>
+            </div>
+          </div>
+        </form>
+        <!-- DISPLAY OWN SHOP MENU -->
+        <div class="row">
+          <div class="  col-xs-8">
+            <table class="table" style=" margin-top: 15px;">
+              <thead>
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">Picture</th>
+                  <th scope="col">meal name</th>
+
+                  <th scope="col">price</th>
+                  <th scope="col">Quantity</th>
+                  <th scope="col">Edit</th>
+                  <th scope="col">Delete</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in product_info %}
+                <tr>
+                  <th scope="row">{{ loop.index }}</th>
+                  <td><img src="data:image/{{row['P_imagetype']}};base64,{{image_info[loop.index-1]}}"
+                      style="width: 72px; height: 72px;" alt="menu_image"></td>
+                  <td>{{row['P_name']}}</td>
+
+                  <td>{{row['P_price']}} </td>
+                  <td>{{row['P_quantity']}} </td>
+                  <td><button type="button" class="btn btn-info" data-toggle="modal" data-target="#{{ loop.index }}">
+                      Edit
+                    </button></td>
+                  <!-- Modal -->
+
+                  <div class="modal fade" id="{{ loop.index }}" data-backdrop="static" tabindex="-1" role="dialog"
+                    aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="staticBackdropLabel">{{row['P_name']}} Edit</h5>
+                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                          </button>
+                        </div>
+                        <!-- EDIT PRODUCT -->
+                        <form id="edit_price_and_quantity" action="edit_price_and_quantity" method="post">
+                          <div class="modal-body">
+                            <input name="edit_PID" type="hidden" value="{{row['PID']}}">
+                            <div class="row">
+                              <div class="col-xs-6">
+                                <label for="edit_price">price</label>
+                                <input class="form-control" id="edit_price" name="edit_price" type="text">
+                              </div>
+                              <div class="col-xs-6">
+                                <label for="edit_quantity">quantity</label>
+                                <input class="form-control" id="edit_quantity" name="edit_quantity" type="text">
+                              </div>
+                            </div>
+                          </div>
+                          <div class="modal-footer">
+                            <button type="submit" class="btn btn-default">Edit</button>
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- DELETE PRODUCT -->
+                  <form id="delete_product" action="delete_product" method="post">
+                    <input name="delete_PID" type="hidden" value="{{row['PID']}}">
+                    <td><button type="submit" class="btn btn-danger">Delete</button></td>
+                  </form>
+                </tr>
+                {% endfor %}
+
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+
+
+      </div>
+
+      <!-- MyOrder -->
+      <div id="MyOrder" class="tab-pane fade">
+        <h3>My Orders</h3>
+        <!-- HOW-TO: Filter table rows based on selected value
+          https://stackoverflow.com/questions/41554154/filter-table-rows-based-on-select-value -->
+        <select class="form-control" name="Status" id="order-status" style="width:150px; "
+          onchange="updateMyOrderTable()">
+          <option>All</option>
+          <option>Finished</option>
+          <option>Not finished</option>
+          <option>Canceled</option>
+        </select>
+        <div class="row">
+          <div class="col-xs-8" id="MyOrder-table">
+            <table class="table" style="margin-top: 15px;">
+              <thead>
+                <tr>
+                  <th scope="col">Order ID</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Start Time</th>
+                  <th scope="col">End Time</th>
+                  <th scope="col">Shop Name</th>
+                  <th scope="col">Total Price</th>
+                  <th scope="col">Order Details</th>
+                  <th scope="col">Action</th>
+                  <th scope="col">Select</th>
+                </tr>
+              </thead>
+              <tbody id="MyOrder-update">
+                <!-- for loop1 should start here -->
+                <tr>
+                  <th scope="row">1</th>
+                  <td>
+                    tmp2
+                  </td>
+                  <td>
+                    tmp3
+                  </td>
+                  <td>
+                    tmp4
+                  </td>
+                  <td>
+                    tmp5
+                  </td>
+                  <td>
+                    tmp6
+                  </td>
+                  <td>
+                    <button type="button" data-toggle="modal" data-target="#MyOrderDetail-1" class="btn btn-info ">Order
+                      Details</button>
+                  </td>
+                  <td>
+                    <button type="button" data-toggle="modal" data-target="test" name="test" class="btn btn-danger "
+                      onclick="none">Cancel Order</button>
+                  </td>
+                </tr>
+                <!-- for loop1 should end here -->
+              </tbody>
+            </table>
+            <div>
+              <button type="button" name="empty" class="btn btn-danger " onclick="batchDeleteMyOrder()">Cancel Seleted
+                Orders</button>
+            </div>
+            <!-- for loop2 should start here -->
+            <!-- Modal: MyOrderDetail-{id} -->
+            <div class="modal fade" id="MyOrderDetail-1" data-backdrop="static" tabindex="-1" role="dialog"
+              aria-labelledby="staticBackdropLabel" aria-hidden="true">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Order Details</h4>
+                  </div>
+                  <div class="modal-body">
+                    <table class="table">
+                      <thread>
+                        <tr>
+                          <th scope="col">#</th>
+                          <th scope="col">Picture</th>
+                          <th scope="col">Meal name</th>
+                          <th scope="col">Price</th>
+                          <th scope="col">Quantity</th>
+                        </tr>
+                      </thread>
+                      <tbody id="MyOrderDetail-T-1">
+                        <tr>
+                          <th scope="row">1</th>
+                          <td>tmp11</td>
+                          <td>tmp12</td>
+                          <td>tmp13</td>
+                          <td>tmp14</td>
+                        </tr>
+                        <tr>
+                          <th scope="row">2</th>
+                          <td>tmp21</td>
+                          <td>tmp22</td>
+                          <td>tmp23</td>
+                          <td>tmp24</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <!-- EX: row['subtotal'] -->
+                    <!-- <p class="text-right">Subtotal $199</p>
+                    <p class="text-right"><small><em>Delivery fee $19</em></small></p>
+                    <p class="text-right">Total Price $218</p> -->
+                    <div class="modal-footer">
+                      <p class="text-right" id="Subtotal"></p>
+                      <p class="text-right" id="Delivery_fee"></p>
+                      <p class="text-right" id="Total_price"></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- for loop2 should end here -->
+          </div>
+        </div>
+        <script type="text/javascript">
+          var UID = -1;
+          // get user location
+          $(document).ready(function () {
+            $.ajax({
+              url: 'http://' + window.location.host + '/get_session',
+              type: 'GET',
+              dataType: 'json',
+              success: function (result) {
+                UID = result.user_info['UID']
+              },
+              error: function (xhr, status, error) {
+                var err = eval("(" + xhr.responseText + ")");
+                alert(err.Message + '\n' + 'http://' + window.location.host + '/get_session');
+              }
+            });
+          })
+          function deleteOrder(oid) {
+            // implement your order delete function
+            // !!! careful, use parseInt(OID) here since OID is str
+            OID = parseInt(oid);
+            $.ajax({
+              url: 'http://' + window.location.host + '/order-delete',
+              type: 'POST',
+              data: { 'OID': OID, 'is_shopowner': false },
+              dataType: 'json',
+              success: function (result) {
+                alert(result.msg);
+              },
+              error: function (jqxhr, textStatus, errorThrown) {
+                alert(jqxhr.responseText)
+              }
+            })
+            // and refresh order table
+            searchMyOrders()
+          }
+          function updateOrderDetail(OID) {
+            $.ajax({
+              url: 'http://' + window.location.host + "/order-detail",
+              method: "POST",
+              data: { 'OID': parseInt(OID), 'UID': parseInt(UID) },
+              async: false,
+              success: function (Order_info) {
+                body = ""
+                var Products = Order_info.Products
+                for (let i = 0; i < Products.length; i++) {
+                  p = Products[i]
+                  body += "<tr>"
+                  body += `<th scope="row">${i + 1}</th>`
+                  body += `<td><img src="data:image/${p.P_imagetype};base64, ${atob(p.P_image)}" style="width: 72px; height: 72px;"></td>
+                            <td>${p.P_name}</td>
+                            <td>${p.P_price}</td>
+                            <td>${p.Order_quantity}</td>`
+                  body += "</tr>"
+                }
+                $('#MyOrderDetail-1 #MyOrderDetail-T-1').html(body);
+                $('#MyOrderDetail-1 #Subtotal').html(`Subtotal $${Order_info.Subtotal}`)
+                $('#MyOrderDetail-1 #Delivery_fee').html(`<small><em>Delivery fee $${Order_info.Delivery_fee}</small></em>`)
+                $('#MyOrderDetail-1 #Total_price').html(`Total Price $${Order_info.Delivery_fee + Order_info.Subtotal}`)
+              },
+              error: function (jqxhr, textStatus, errorThrown) {
+                alert(jqxhr.responseText)
+              }
+            })
+          }
+          function batchDeleteMyOrder() {
+            all_succ = true;
+            has_select = false;
+            $('#MyOrder-table').find('input:checked').each(function () {
+              has_select = true;
+              OID = parseInt($(this).attr('name'))
+              $.ajax({
+                url: 'http://' + window.location.host + '/order-delete',
+                type: 'POST',
+                async: false,
+                data: { 'OID': OID, 'is_shopowner': false },
+                dataType: 'json',
+                success: function (result) {
+                  console.log(result.msg);
+                },
+                error: function (jqxhr, textStatus, errorThrown) {
+                  all_succ = false;
+                  alert(jqxhr.responseText);
+                }
+              })
+            });
+            console.log(all_succ);
+            if (all_succ && has_select) {
+              alert('Seleted orders canceled successfully');
+            }
+            searchMyOrders()
+          }
+          MyOrders = []
+          function updateMyOrderTable() {
+            var table = '', filter = document.getElementById("order-status").value;
+            $.each(MyOrders, function (i, order) {
+              if (filter != 'All' && order.Status != filter) { return; }
+              table += '<tr><th scope="row">' + order.OID + '</th>';
+              table += '<td>' + order.Status + '</td>';
+              table += '<td>' + order.start_time + '</td>';
+              table += '<td>' + order.end_time + '</td>';
+              table += '<td>' + order.S_name + '</td>';
+              table += '<td>' + order.total_price + '</td>';
+              if (order.Status == 'Not finished') {
+                not_fin = `
+                <td>
+                  <button type="button" name="${order.OID}" data-toggle="modal" data-target="test" name="test" class="btn btn-danger "
+                    onclick="deleteOrder(this.name)">Cancel Order</button>
+                </td>
+                <td>
+                  <input type="checkbox" class="form-check-input" name="${order.OID}">
+                </td>
+                `
+              } else {
+                not_fin = `<td></td><td></td>`
+              }
+              table += `
+                <td>
+                  <button type="button" name="${order.OID}" data-toggle="modal" data-target="#MyOrderDetail-1" class="btn btn-info " 
+                  onclick="updateOrderDetail(this.name)"> Order Details</button>
+                </td>
+                ${not_fin}</tr>`;
+            });
+            $("#MyOrder-update").html(table);
+          }
+          function searchMyOrders() {
+            $.ajax({
+              url: 'http://' + window.location.host + "/search-MyOrders",
+              method: "POST",
+              data: { 'UID': UID },
+              async: false,
+              success: function (data) {
+                MyOrders = data.tableRow;
+                updateMyOrderTable();
+              },
+              error: function (jqxhr, textStatus, errorThrown) {
+                alert("error: " + textStatus)
+              }
+            })
+          }
+        </script>
+      </div>
+
+      <!-- Shop Orders -->
+      <div id="ShopOrder" class="tab-pane fade">
+        <h3>Shop Orders</h3>
+        <select class="form-control" name="Status" id="shop-order-status" style="width:150px; "
+          onchange="updateShopOrderTable()">
+          <option>All</option>
+          <option>Finished</option>
+          <option>Not finished</option>
+          <option>Canceled</option>
+        </select>
+        <div class="row">
+          <div class="col-xs-8" id="ShopOrder-table">
+            <table class="table" style="margin-top: 15px;">
+              <thead>
+                <tr>
+                  <th scope="col">Order ID</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Start Time</th>
+                  <th scope="col">End Time</th>
+                  <th scope="col">Shop Name</th>
+                  <th scope="col">Total Price</th>
+                  <th scope="col">Order Details</th>
+                  <th scope="col">Action</th>
+                  <th scope="col">Select</th>
+                </tr>
+              </thead>
+              <tbody id="ShopOrder-update">
+                <!-- for loop1 should start here -->
+                <tr>
+                  <th scope="row">1</th>
+                  <td>
+                    tmp2
+                  </td>
+                  <td>
+                    tmp3
+                  </td>
+                  <td>
+                    tmp4
+                  </td>
+                  <td>
+                    tmp5
+                  </td>
+                  <td>
+                    tmp6
+                  </td>
+                  <td>
+                    <button type="button" data-toggle="modal" data-target="#ShopOrderDetail-1"
+                      class="btn btn-info ">Order Details</button>
+                  </td>
+                  <td>
+                    <button type="button" data-toggle="modal" data-target="test" name="test" class="btn btn-success "
+                      onclick="none">Done</button>
+                    <button type="button" data-toggle="modal" data-target="test" name="test" class="btn btn-danger "
+                      onclick="none">Cancel</button>
+                  </td>
+                </tr>
+                <!-- for loop1 should end here -->
+              </tbody>
+            </table>
+            <div>
+              <button type="button" name="empty" class="btn btn-danger " onclick="batchDeleteShopOrder()">Cancel Seleted
+                Orders</button>
+              <button type="button" name="empty" class="btn btn-success " onclick="batchCompleteShopOrder()">Complete
+                Seleted Orders</button>
+            </div>
+            <!-- for loop2 should start here -->
+            <!-- Modal: ShopOrderDetail-{id} -->
+            <div class="modal fade" id="ShopOrderDetail-1" data-backdrop="static" tabindex="-1" role="dialog"
+              aria-labelledby="staticBackdropLabel" aria-hidden="true">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Order Details</h4>
+                  </div>
+                  <div class="modal-body">
+                    <table class="table">
+                      <thread>
+                        <tr>
+                          <th scope="col">#</th>
+                          <th scope="col">Picture</th>
+                          <th scope="col">Meal name</th>
+                          <th scope="col">Price</th>
+                          <th scope="col">Quantity</th>
+                        </tr>
+                      </thread>
+                      <tbody id="ShopOrderDetail-T-1">
+                        <tr>
+                          <th scope="row">1</th>
+                          <td>tmp11</td>
+                          <td>tmp12</td>
+                          <td>tmp13</td>
+                          <td>tmp14</td>
+                        </tr>
+                        <tr>
+                          <th scope="row">2</th>
+                          <td>tmp21</td>
+                          <td>tmp22</td>
+                          <td>tmp23</td>
+                          <td>tmp24</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <!-- EX: row['subtotal'] -->
+                    <!-- <p class="text-right">Subtotal $200</p>
+                    <p class="text-right"><small><em>Delivery fee $0</em></small></p>
+                    <p class="text-right">Total Price $200</p> -->
+                    <div class="modal-footer">
+                      <p class="text-right" id="Subtotal"></p>
+                      <p class="text-right" id="Delivery_fee"></p>
+                      <p class="text-right" id="Total_price"></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- for loop2 should end here -->
+          </div>
+        </div>
+        <script type="text/javascript">
+          function completeShopOrder(oid) {
+            // implement your order complete function
+            // !!! careful, use parseInt(OID) here since OID is str
+            OID = parseInt(oid);
+            $.ajax({
+              url: 'http://' + window.location.host + '/order-complete',
+              type: 'POST',
+              data: { 'OID': OID },
+              dataType: 'json',
+              success: function (result) {
+                alert(result.msg);
+              },
+              error: function (jqxhr, textStatus, errorThrown) {
+                alert(jqxhr.responseText)
+              }
+            })
+            // and refresh order table
+            searchShopOrders();
+          }
+          function cancelShopOrder(oid) {
+            // implement your order cancel function
+            // !!! careful, use parseInt(OID) here since OID is str
+            OID = parseInt(oid);
+            $.ajax({
+              url: 'http://' + window.location.host + '/order-delete',
+              type: 'POST',
+              data: { 'OID': OID, 'is_shopowner': true },
+              dataType: 'json',
+              success: function (result) {
+                alert(result.msg);
+              },
+              error: function (jqxhr, textStatus, errorThrown) {
+                alert(jqxhr.responseText)
+              }
+            })
+            // and refresh order table
+            searchShopOrders();
+          }
+          function updateShopOrderDetail(OID) {
+            $.ajax({
+              url: 'http://' + window.location.host + "/order-detail",
+              method: "POST",
+              data: { 'OID': parseInt(OID), 'UID': parseInt(UID) },
+              async: false,
+              success: function (Order_info) {
+                body = ""
+                var Products = Order_info.Products
+                for (let i = 0; i < Products.length; i++) {
+                  p = Products[i]
+                  body += "<tr>"
+                  body += `<th scope="row">${i + 1}</th>`
+                  body += `<td><img src="data:image/${p.P_imagetype};base64, ${atob(p.P_image)}" style="width: 72px; height: 72px;"></td>
+                            <td>${p.P_name}</td>
+                            <td>${p.P_price}</td>
+                            <td>${p.Order_quantity}</td>`
+                  body += "</tr>"
+                }
+                $('#ShopOrderDetail-1 #ShopOrderDetail-T-1').html(body);
+                $('#ShopOrderDetail-1 #Subtotal').html(`Subtotal $${Order_info.Subtotal}`)
+                $('#ShopOrderDetail-1 #Delivery_fee').html(`<small><em>Delivery fee $${Order_info.Delivery_fee}</small></em>`)
+                $('#ShopOrderDetail-1 #Total_price').html(`Total Price $${Order_info.Delivery_fee + Order_info.Subtotal}`)
+              },
+              error: function (jqxhr, textStatus, errorThrown) {
+                alert(jqxhr.responseText)
+              }
+            })
+          }
+          function batchCompleteShopOrder() {
+            all_succ = true;
+            has_select = false;
+            $('#ShopOrder-table').find('input:checked').each(function () {
+              has_select = true;
+              OID = parseInt($(this).attr('name'))
+              $.ajax({
+                url: 'http://' + window.location.host + '/order-complete',
+                type: 'POST',
+                async: false,
+                data: { 'OID': OID },
+                dataType: 'json',
+                success: function (result) {
+                  console.log(result.msg);
+                },
+                error: function (jqxhr, textStatus, errorThrown) {
+                  all_succ = false;
+                  alert(jqxhr.responseText);
+                }
+              })
+            });
+            if (all_succ && has_select) {
+              alert('Seleted orders completed successfully');
+            }
+            searchShopOrders()
+          }
+          function batchDeleteShopOrder() {
+            all_succ = true;
+            has_select = false;
+            $('#ShopOrder-table').find('input:checked').each(function () {
+              has_select = true;
+              OID = parseInt($(this).attr('name'))
+              $.ajax({
+                url: 'http://' + window.location.host + '/order-delete',
+                type: 'POST',
+                async: false,
+                data: { 'OID': OID, 'is_shopowner': true },
+                dataType: 'json',
+                success: function (result) {
+                  console.log(result.msg);
+                },
+                error: function (jqxhr, textStatus, errorThrown) {
+                  all_succ = false;
+                  alert(jqxhr.responseText);
+                }
+              })
+            });
+            if (all_succ && has_select) {
+              alert('Seleted orders canceled successfully');
+            }
+            searchShopOrders()
+          }
+          ShopOrders = [];
+          function updateShopOrderTable() {
+            var table = '', filter = document.getElementById("shop-order-status").value;
+            $.each(ShopOrders, function (i, order) {
+              if (filter != 'All' && order.Status != filter) { return; }
+              table += '<tr><th scope="row">' + order.OID + '</th>';
+              table += '<td>' + order.Status + '</td>';
+              table += '<td>' + order.start_time + '</td>';
+              table += '<td>' + order.end_time + '</td>';
+              table += '<td>' + order.S_name + '</td>';
+              table += '<td>' + order.total_price + '</td>';
+              table += `
+                <td>
+                  <button type="button" name="${order.OID}" data-toggle="modal" data-target="#ShopOrderDetail-1" class="btn btn-info " 
+                  onclick="updateShopOrderDetail(this.name)"> Order Details</button>
+                </td>`;
+              if (order.Status == 'Not finished') {
+                table += `
+                <td>
+                  <button type="button" name="${order.OID}" data-toggle="modal" class="btn btn-success " 
+                  onclick="completeShopOrder(this.name)"> Done</button>
+                  <button type="button" name="${order.OID}" data-toggle="modal" class="btn btn-danger " 
+                  onclick="cancelShopOrder(this.name)"> Cancel</button>
+                </td>
+                <td>
+                  <input type="checkbox" class="form-check-input" name="${order.OID}">
+                </td></tr>`
+              } else {
+                table += '<td></td><td></td></tr>'
+              }
+            });
+            $("#ShopOrder-update").html(table);
+          }
+          function searchShopOrders() {
+            $.ajax({
+              url: 'http://' + window.location.host + "/search-ShopOrders",
+              method: "POST",
+              data: { 'UID': UID },
+              async: false,
+              success: function (data) {
+                ShopOrders = data.tableRow;
+                updateShopOrderTable();
+              },
+              error: function (jqxhr, textStatus, errorThrown) {
+                alert("error: " + textStatus)
+              }
+            })
+          }
+        </script>
+      </div>
+
+      <!-- Transacrion Records -->
+      <div id="TsRecord" class="tab-pane fade">
+        <h3>Transacrion Records</h3>
+        <select class="form-control" name="Status" id="transaction-status" style="width:150px; "
+          onchange="updateTransactionRecord()">
+          <option value="All">All</option>
+          <option value="Payment">Payment</option>
+          <option value="Recieve">Recieve</option>
+          <option value="Recharge">Recharge</option>
+        </select>
+        <div class="row">
+          <div class="col-xs-8">
+            <table class="table" style="margin-top: 15px;">
+              <thead>
+                <tr>
+                  <th scope="col">Record ID</th>
+                  <th scope="col">Action</th>
+                  <th scope="col">Time</th>
+                  <th scope="col">Trader</th>
+                  <th scope="col">Amount</th>
+                </tr>
+              </thead>
+              <tbody id="transaction-update">
+                <tr>
+                  <td>
+                    tmp1
+                  </td>
+                  <td>
+                    tmp2
+                  </td>
+                  <td>
+                    tmp3
+                  </td>
+                  <td>
+                    tmp4
+                  </td>
+                  <td>
+                    tmp5
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <script type="text/javascript">
+        transactions = [];
+        function updateTransactionRecord() {
+          var table = '', filter = document.getElementById("transaction-status").value;
+          $.each(transactions, function (i, transaction) {
+            if (filter != 'All' && transaction.Action != filter) { return; }
+            table += '<tr><th scope="row">' + transaction.TID + '</th>';
+            table += '<td>' + transaction.Action + '</td>';
+            table += '<td>' + transaction.Time + '</td>';
+            table += '<td>' + transaction.Trader + '</td>';
+            table += '<td>' + transaction.T_amount + '</td></tr>';
+          });
+          $("#transaction-update").html(table);
+        }
+        function searchTransactionRecord() {
+          $.ajax({
+            url: 'http://' + window.location.host + "/search-transactionRecord",
+            type: "POST",
+            data: { 'UID': UID },
+            async: false,
+            success: function (data) {
+              transactions = data.tableRow
+              updateTransactionRecord();
+            },
+            error: function (jqxhr, textStatus, errorThrown) {
+              alert("error: " + textStatus)
+            }
+          })
+        }
+      </script>
+
+    </div>
+  </div>
+
+  <!-- Option 1: Bootstrap Bundle with Popper -->
+  <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script> -->
+  <script>
+    $(document).ready(function () {
+      $(".nav-tabs a").click(function () {
+        $(this).tab('show');
+      });
+    });
+  </script>
+
+  <!-- Option 2: Separate Popper and Bootstrap JS -->
+  <!--
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js" integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous"></script>
+    -->
+</body>
+
+</html>
